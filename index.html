@@ -271,6 +271,13 @@
     cursor: default;
   }
 
+  .option:focus-visible,
+  .next-btn:focus-visible,
+  .restart-btn:focus-visible {
+    outline: 3px solid var(--accent-2);
+    outline-offset: 3px;
+  }
+
   .option.correct {
     background: var(--correct-bg);
     border-color: var(--correct);
@@ -523,6 +530,7 @@
       btn.addEventListener('click', () => selectAnswer(idx, btn));
       optionsEl.appendChild(btn);
     });
+    optionsEl.querySelector('.option').focus();
   }
 
   function selectAnswer(idx, btn) {
@@ -548,6 +556,7 @@
     progressFill.style.width = `${((current + 1) / questions.length) * 100}%`;
     nextBtn.classList.add('visible');
     nextBtn.disabled = false;
+    nextBtn.focus();
   }
 
   nextBtn.addEventListener('click', () => {
@@ -581,6 +590,7 @@
     document.getElementById('resultTitle').textContent = title;
     document.getElementById('resultScoreLine').textContent = `You scored ${score} out of ${questions.length}`;
     document.getElementById('resultVerdict').textContent = verdict;
+    restartBtn.focus();
   }
 
   restartBtn.addEventListener('click', () => {
