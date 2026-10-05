@@ -509,7 +509,7 @@
   let score = 0;
   let locked = false;
 
-  function render() {
+  function render(focusFirstOption = false) {
     const q = questions[current];
     questionCount.textContent = `Question ${current + 1} / ${questions.length}`;
     scorePill.textContent = `Score: ${score}`;
@@ -530,7 +530,9 @@
       btn.addEventListener('click', () => selectAnswer(idx, btn));
       optionsEl.appendChild(btn);
     });
-    optionsEl.querySelector('.option').focus();
+    if (focusFirstOption) {
+      optionsEl.querySelector('.option').focus();
+    }
   }
 
   function selectAnswer(idx, btn) {
@@ -564,7 +566,7 @@
     if (current >= questions.length) {
       showResults();
     } else {
-      render();
+      render(true);
     }
   });
 
@@ -598,7 +600,7 @@
     score = 0;
     resultsView.classList.add('hidden');
     quizView.classList.remove('hidden');
-    render();
+    render(true);
   });
 
   render();
