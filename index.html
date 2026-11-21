@@ -123,6 +123,15 @@
     .result-summary strong { display: block; font-size: 20px; }
     .result-summary span { color: var(--muted); font-size: 11px; }
     .results .primary { width: 100%; font-size: 14px; padding: 13px; }
+    .wrong-review { margin: 25px 0; padding-top: 21px; border-top: 1px solid var(--line); text-align: left; }
+    .wrong-review h3 { margin: 0 0 13px; font-size: 16px; }
+    .wrong-list { display: grid; gap: 12px; }
+    .wrong-item { padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+    .wrong-item h4 { margin: 0 0 10px; font-size: 14px; line-height: 1.5; }
+    .wrong-answer, .correct-answer, .wrong-fact { display: block; font-size: 12px; }
+    .wrong-answer { color: var(--red); }
+    .correct-answer { color: var(--green); margin-top: 3px; }
+    .wrong-fact { color: var(--muted); margin-top: 9px; }
     .question-enter { animation: reveal .35s ease; }
     @keyframes float { 50% { transform: translateY(-6px) rotate(-3deg); } }
     @keyframes twinkle { to { opacity: .3; } }
@@ -212,6 +221,10 @@
         <div><strong id="wrong-count" style="color:var(--red)"></strong><span>틀린 문제</span></div>
         <div><strong id="accuracy"></strong><span>정답률</span></div>
       </div>
+      <section class="wrong-review" aria-labelledby="wrong-review-title">
+        <h3 id="wrong-review-title">틀린 문제 다시 보기</h3>
+        <div class="wrong-list" id="wrong-list"></div>
+      </section>
       <button class="primary" id="restart">다시 탐험하기 <span class="arrow" aria-hidden="true">↻</span></button>
     </section>
     <p class="note"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 11h4M6 14h4M5 8a4 4 0 1 1 6 0l-1 2H6Z" stroke="currentColor" stroke-linecap="round"/></svg>괜찮아요. 별도 빛나기까지 시간이 필요하니까요.</p>
@@ -270,6 +283,7 @@
       if (answered) return;
       answered = true;
       const item = questions[current];
+      item.selected = selected;
       const correct = selected === item.answer;
       if (correct) score++;
       const buttons = [...$("options").children];
@@ -312,6 +326,32 @@
       $("correct-count").textContent = score;
       $("wrong-count").textContent = questions.length - score;
       $("accuracy").textContent = `${score / questions.length * 100}%`;
+      $("wrong-list").replaceChildren();
+      const wrongQuestions = questions.filter((item) => item.selected !== item.answer);
+      if (wrongQuestions.length === 0) {
+        const encouragement = document.createElement("p");
+        encouragement.className = "wrong-fact";
+        encouragement.textContent = "모든 문제를 맞혔어요! 우주 탐험의 전설다운 완벽한 여정이었어요.";
+        $("wrong-list").append(encouragement);
+      } else {
+        wrongQuestions.forEach((item, index) => {
+          const review = document.createElement("article");
+          review.className = "wrong-item";
+          const question = document.createElement("h4");
+          question.textContent = `${index + 1}. ${item.question}`;
+          const selected = document.createElement("span");
+          selected.className = "wrong-answer";
+          selected.textContent = `내가 고른 답: ${item.options[item.selected]}`;
+          const correct = document.createElement("span");
+          correct.className = "correct-answer";
+          correct.textContent = `정답: ${item.options[item.answer]}`;
+          const fact = document.createElement("span");
+          fact.className = "wrong-fact";
+          fact.textContent = item.fact;
+          review.append(question, selected, correct, fact);
+          $("wrong-list").append(review);
+        });
+      }
       $("result-title").focus({ preventScroll: true });
     }
 
@@ -323,6 +363,7 @@
     $("restart").addEventListener("click", () => {
       current = 0;
       score = 0;
+      questions.forEach((item) => { item.selected = null; });
       $("results").hidden = true;
       $("quiz").hidden = false;
       updateProgress(0);
